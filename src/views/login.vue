@@ -28,30 +28,30 @@ export default {
     }
   },
   methods: {
-    // handleLogin() {
-    //   this.$http.post('login', this.formData)
-    //     .then((res) => {
-    //       const {data: {meta: {status, msg}}} = res.data;
-    //       if(status == 200) {
-    //         const token = res.data.data.token;
-    //         sessionStorage.setItem('token', token);
-    //         this.$message.success(msg);
-    //       } else {
-    //         this.$message.error(msg);
-    //       }
-    //     })
-    // }
-    async handleLogin() {
-      const res = await this.post('login', this.formData);
-      const {data: {meta: {status, msg}}} = res.data;
-      if(status == 200) {
-        const token = res.data.data.token;
-        sessionStorage.setItem('token', token);
-        this.$message.success(msg);
-      } else {
-        this.$message.error(msg);
-      }
-    } 
+    handleLogin() {
+      this.$http.post('login', this.formData)
+        .then((res) => {
+          const {meta: {status, msg}} = res.data;
+          if(status == 200) {
+            const token = res.data.data.token;
+            sessionStorage.setItem('token', token);
+            this.$message.success(msg);
+          } else {
+            this.$message.error(msg);
+          }
+        })
+    }
+    // async handleLogin() {
+    //   const res = await this.post('login', this.formData);
+    //   const {data: {meta: {status, msg}}} = res.data;
+    //   if(status == 200) {
+    //     const token = res.data.data.token;
+    //     sessionStorage.setItem('token', token);
+    //     this.$message.success(msg);
+    //   } else {
+    //     this.$message.error(msg);
+    //   }
+    // } 
   }
 }
 </script>

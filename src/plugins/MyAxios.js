@@ -6,8 +6,7 @@ MyAxios.install = (Vue) => {
   // Vue.prototype.$http = axios;
 
   const instance = axios.create({
-    // baseURL: 'http://localhost:8888/api/private/v1/'
-    baseURL: 'http://192.168.129.67:8888/api/private/v1/'
+    baseURL: 'http://localhost:8888/api/private/v1/'
   })
   Vue.prototype.$http = instance;
 
