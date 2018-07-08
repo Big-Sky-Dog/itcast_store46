@@ -5,7 +5,7 @@
       label-position="top"
       label-width="80px"
       :model="formData">
-      <h2>用户登录</h2>
+      <h2 class="userlogin">用户登录</h2>
       <el-form-item label="用户名">
         <el-input v-model="formData.username"></el-input>
       </el-form-item>
@@ -38,7 +38,11 @@ export default {
             this.$message.success(msg);
           } else {
             this.$message.error(msg);
+            return;
           }
+        })
+        .then(() => {
+          this.$router.push({name: 'home'});
         })
     }
     // async handleLogin() {
@@ -72,5 +76,8 @@ export default {
 }
 .login-button {
   width: 100%;
+}
+.userlogin {
+  margin: 20px 0;
 }
 </style>
