@@ -12,9 +12,30 @@
         <el-input class="searchInput" clearable placeholder="请输入内容">
           <el-button slot="append" icon="el-icon-search"></el-button>
         </el-input>
-        <el-button type="success" plain>添加用户</el-button>
+        <el-button type="success" plain @click="userFormVisible = true">添加用户</el-button>
       </el-col>
     </el-row>
+    <!-- 添加用户 -->
+    <el-dialog title="添加用户" :visible.sync="userFormVisible">
+      <el-form label-position="right" label-width="120px" :model="form">
+        <el-form-item label="用户名">
+          <el-input v-model="form.username"  auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="form.password" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email" ></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="form.mobile" ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="userFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="userAdd">确 定</el-button>
+      </div>
+    </el-dialog> 
     <!-- 表格 -->
     <el-table
       v-loading="loading"
@@ -61,7 +82,8 @@
         label="操作">
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit" ></el-button>
-          <el-button plain size="mini" type="danger" icon="el-icon-delete" ></el-button>
+          <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="delUser"></el-button>
+          <!-- <el-button plain size="mini" type="danger" icon="el-icon-delete" :key="index" v-for="(item, index) in list" @click="delUser(item.id)"></el-button> -->
           <el-button plain size="mini" type="success" icon="el-icon-check" ></el-button>
         </template>
       </el-table-column>
@@ -74,7 +96,14 @@ export default {
   data() {
     return {
       list: [],
-      loading: true
+      loading: true,
+      userFormVisible: false,
+      form: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
     }
   },
   created() {
@@ -99,6 +128,60 @@ export default {
         .then(() => {
           this.loading = false;
         })
+    },
+    Verifying() {
+      const reg1 = /^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/;
+      if (!reg1.test(this.form.mobile)) {
+        this.$message.error('手机号格式有误');
+        return;
+      }
+      const reg2 = /([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})$/;
+      if (!reg2.test(this.form.email)) {
+        this.$message.error('邮箱格式有误');
+        return;
+      }
+    },
+    userAdd() {
+      this.userFormVisible = false;
+      this.$http.post('users', this.form)
+        .then(() => {
+          this.Verifying();
+        })
+        .then((res) => {
+          console.log(res)
+          if (res.status == 200) {
+            this.$message.warning('添加成功');
+            this.loadData();
+          }
+        })
+    },
+    delUser(id) {
+      this.$http.delete(`users/${id}`)
+        .then((res) => {
+          if (res.status == 200) {
+            this.$message.warning('删除成功');
+            this.loadData()
+          }
+        })
+      // console.log(this.list)
+      // this.$confirm('确定.i要删除该用户么?', '提示', {
+      //   confirmButtonText: '确定',
+      //   cancelButtonText: '取消',
+      //   type: 'warning'
+      // })
+      //   .then(() => {
+      //     // 
+            
+      //   })
+      //   .then(() => {
+      //     this.$message({
+      //       type: 'success',
+      //       message: '删除成功'
+      //     });
+      //   })
+      //   .then(() => {
+      //     this.loadData();
+      //   })
     }
   }
 }

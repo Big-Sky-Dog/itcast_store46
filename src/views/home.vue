@@ -101,11 +101,21 @@ export default {
   },
   methods: {
     logOut() {
-      if (confirm('确定要退出么?')) {
-        sessionStorage.clear();
-        this.$router.push({name: 'login'});
-        this.$message.warning('退出成功');
-      }
+      this.$confirm('确定要退出登录么?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.$message({
+            type: 'success',
+            message: '退出成功'
+          });
+        })
+        .then(() => {
+          sessionStorage.clear();
+          this.$router.push({name: 'login'});
+        })
     }
   }
 }
