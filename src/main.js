@@ -7,11 +7,14 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import MyAxios from './plugins/MyAxios'
 import './assets/css/style.css'
+import moment from 'moment'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(MyAxios)
-
+Vue.filter('fmtDate', (value, fmtString) => {
+  return moment(value).format(fmtString);
+});
 
 /* eslint-disable no-new */
 new Vue({

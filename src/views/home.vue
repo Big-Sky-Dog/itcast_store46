@@ -6,7 +6,7 @@
           <img src="/static/logo.png" class="logo" alt="">
         </el-col>
         <el-col :span="16" class="middle">
-          <h2>电商后台管理系统</h2>
+          <h2>后台管理系统</h2>
         </el-col>
         <el-col :span="4">
           <a href="#" class="logout" @click.prevent="logOut">退出</a>
@@ -83,7 +83,9 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -99,9 +101,11 @@ export default {
   },
   methods: {
     logOut() {
-      sessionStorage.clear();
-      this.$router.push({name: 'login'});
-      this.$message.warning('退出成功');
+      if (confirm('确定要退出么?')) {
+        sessionStorage.clear();
+        this.$router.push({name: 'login'});
+        this.$message.warning('退出成功');
+      }
     }
   }
 }
@@ -111,18 +115,15 @@ export default {
   .container {
     height: 100%;
   }
-
   .header {
     background-color: #b3c0d1;
     padding: 0;
   }
-
   .header .middle {
     line-height: 60px;
     color: #fff;
     text-align: center;
   }
-
   .header .logout {
     line-height: 60px;
     color: black;
@@ -131,11 +132,9 @@ export default {
     margin-right: 50px;
     text-decoration: none;
   }
-
   .aside {
     background-color: #fff;
   }
-
   .main {
     background-color: #e9eef3;
     height: 100%;
