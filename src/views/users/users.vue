@@ -15,27 +15,6 @@
         <el-button type="success" plain @click.prevent="AdduserFormVisible = true">添加用户</el-button>
       </el-col>
     </el-row>
-    <!-- 添加用户 -->
-    <el-dialog title="添加用户" :visible.sync="AdduserFormVisible">
-      <el-form label-position="right" label-width="120px" :model="form" ref="myform" :rules="formRules">
-        <el-form-item label="用户名"  prop="username">
-          <el-input v-model="form.username"  auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="密码"  prop="password">
-          <el-input v-model="form.password" type="password" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="form.email" ></el-input>
-        </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="form.mobile" ></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="AdduserFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="userAdd">确 定</el-button>
-      </div>
-    </el-dialog> 
     <!-- 表格 -->
     <el-table
       v-loading="loading"
@@ -82,7 +61,7 @@
       <el-table-column
         label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit" ></el-button>
+          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleShowEditDialog(scope.row)"></el-button>
           <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="delUser(scope.row.id)"></el-button>
           <!-- <el-button plain size="mini" type="danger" icon="el-icon-delete" :key="index" v-for="(item, index) in list" @click="delUser(item.id)"></el-button> -->
           <el-button plain size="mini" type="success" icon="el-icon-check" ></el-button>
@@ -107,6 +86,53 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
+    
+        <!-- 添加用户 -->
+    <el-dialog title="添加用户" :visible.sync="AdduserFormVisible">
+      <el-form label-position="right" label-width="120px" :model="form" ref="myform" :rules="formRules">
+        <el-form-item label="用户名"  prop="username">
+          <el-input v-model="form.username"  auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码"  prop="password">
+          <el-input v-model="form.password" type="password" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email" ></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="form.mobile" ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="AdduserFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="userAdd">确 定</el-button>
+      </div>
+    </el-dialog> 
+
+    <!-- 修改用户的弹出框 -->
+    <el-dialog @closed="handleClosed" title="编辑用户" :visible.sync="editUserDialogVisible">
+      <el-form
+        ref="myform"
+        :rules="formRules"
+        label-width="100px"
+        :model="form">
+        <el-form-item label="用户名" prop="username">
+          <el-input disabled v-model="form.username" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="form.mobile" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editUserDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleEdit">确 定</el-button>
+      </div>
+    </el-dialog>
+
+
   </el-card>
 </template>
 
@@ -136,7 +162,8 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
         ]
-     }
+     },
+     editUserDialogVisible: false,
     }
   },
   created() {
@@ -227,7 +254,38 @@ export default {
         .then(() => {
           this.loadData();
         })
-    }
+    },
+    async handleEdit() {
+      // console.log(this.form);
+      const res = await this.$http.put(`users/${this.form.id}`, {
+        mobile: this.form.mobile,
+        email: this.form.email
+      });
+      const data = res.data;
+      const { meta: { status, msg } } = data;
+      if (status === 200) {
+        this.$message.success(msg);
+        this.editUserDialogVisible = false;
+        this.loadData();
+      } else {
+        this.$message.error(msg);
+      }
+    },
+    handleClosed() {
+      for (let key in this.form) {
+        this.form[key] = '';
+      }
+    },
+     handleShowEditDialog(user) {
+      // 显示对话框
+      this.editUserDialogVisible = true;
+      // 文本框显示用户信息
+      this.form.username = user.username;
+      this.form.email = user.email;
+      this.form.mobile = user.mobile;
+      this.form.id = user.id;
+    },
+
   }
 }
 </script>
