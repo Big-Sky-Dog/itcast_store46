@@ -9,10 +9,10 @@
     <!-- 搜索区域 -->
     <el-row class="searchArea">
       <el-col :span="24">
-        <el-input class="searchInput" clearable placeholder="请输入内容">
-          <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-input v-model="searchValue" class="searchInput" clearable placeholder="请输入内容">
+          <el-button @click="handleSearch" slot="append" icon="el-icon-search"></el-button>
         </el-input>
-        <el-button type="success" plain @click="userFormVisible = true">添加用户</el-button>
+        <el-button type="success" plain @click="userAdd">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 添加用户 -->
@@ -22,7 +22,7 @@
           <el-input v-model="form.username"  auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="form.password" auto-complete="off"></el-input>
+          <el-input v-model="form.password" type="password" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input v-model="form.email" ></el-input>
@@ -88,6 +88,24 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- @size-change 每页多少条数据发生改变 触发的事件 -->
+    <!-- @current-change 当前页码改变发生 -->
+    <!-- current-page 当前页码 -->
+    <!-- page-sizes 每页多少条数据的下拉框 -->
+    <!-- page-size 每页显示多少条数据 -->
+
+    <!-- total  总条数 -->
+    <!-- layout 分页所支持的功能 -->
+    <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pagenum"
+      :page-sizes="[2, 4, 6, 8]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
   </el-card>
 </template>
 
@@ -98,6 +116,10 @@ export default {
       list: [],
       loading: true,
       userFormVisible: false,
+      searchValue: '',
+      pagenum: 1,
+      pagesize: 8,
+      total: 0,
       form: {
         username: '',
         password: '',
@@ -109,18 +131,31 @@ export default {
   created() {
     this.loadData();
   },
+  mounted (){
+  },
   methods: {
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.loadData();
+      console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      this.pagenum = val;
+      this.loadData();
+      console.log(`当前页: ${val}`);
+    },
     loadData() {
       this.loading = true;
       const token = sessionStorage.getItem('token');
       this.$http.defaults.headers.common['Authorization'] = token;
-      this.$http.get('users?pagenum=1&pagesize=10')
+      this.$http.get(`users?pagenum=${this.pagenum}&pagesize=${this.pagesize}&query=${this.searchValue}`)
         .then((res) => {
           this.loading = true;
           const {meta: {msg, status}} = res.data;
           if (status == 200) {
-            const {data: {users}} = res.data;
+            const {data: {users, total}} = res.data;
             this.list = users;
+            this.total = total;
           } else {
             this.$message.error(msg);
           }
@@ -129,59 +164,50 @@ export default {
           this.loading = false;
         })
     },
-    Verifying() {
-      const reg1 = /^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/;
-      if (!reg1.test(this.form.mobile)) {
-        this.$message.error('手机号格式有误');
-        return;
-      }
-      const reg2 = /([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})$/;
-      if (!reg2.test(this.form.email)) {
-        this.$message.error('邮箱格式有误');
-        return;
-      }
+    handleSearch() {
+      this.loadData();
     },
     userAdd() {
-      this.userFormVisible = false;
       this.$http.post('users', this.form)
-        .then(() => {
-          this.Verifying();
-        })
         .then((res) => {
-          console.log(res)
-          if (res.status == 200) {
-            this.$message.warning('添加成功');
-            this.loadData();
-          }
+            if (res.status == 200) {
+              this.$message.warning('添加成功');
+              this.userFormVisible = false;
+              this.form.username = '',
+              this.form.password = '',
+              this.form.email = '',
+              this.form.mobile = '',
+              this.loadData();
+            } else {
+              this.$message.error('添加失败');
+              this.userFormVisible = true;
+            }
+          // }
         })
     },
     delUser(id) {
-      this.$http.delete(`users/${id}`)
-        .then((res) => {
-          if (res.status == 200) {
-            this.$message.warning('删除成功');
-            this.loadData()
-          }
+      this.$confirm('确定要删除该用户么?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+        this.$http.delete(`users/${id}`)
+          .then((res) => {
+            const {mate: {status, msg}} = res.data;
+            if (status == 200) {
+              this.$message.warning('删除成功');
+              this.loadData()
+            }
+          })
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          });
         })
-      // console.log(this.list)
-      // this.$confirm('确定.i要删除该用户么?', '提示', {
-      //   confirmButtonText: '确定',
-      //   cancelButtonText: '取消',
-      //   type: 'warning'
-      // })
-      //   .then(() => {
-      //     // 
-            
-      //   })
-      //   .then(() => {
-      //     this.$message({
-      //       type: 'success',
-      //       message: '删除成功'
-      //     });
-      //   })
-      //   .then(() => {
-      //     this.loadData();
-      //   })
+        .then(() => {
+          this.loadData();
+        })
     }
   }
 }
