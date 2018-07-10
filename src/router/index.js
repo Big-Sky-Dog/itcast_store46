@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Login from '@/views/login'
 import Home from '@/views/home'
 import Users from '@/views/users/users'
+import Rigths from '@/views/roles/rigths'
 
 Vue.use(Router)
 
@@ -22,6 +23,11 @@ export default new Router({
           name: 'users',
           path: '/users',
           component: Users
+        },
+        {
+          name: 'rights',
+          path: '/rights',
+          component: Rigths
         }
       ]
     }
