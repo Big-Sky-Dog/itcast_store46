@@ -12,11 +12,11 @@
         <el-input v-model="searchValue" class="searchInput" clearable placeholder="请输入内容">
           <el-button @click="handleSearch" slot="append" icon="el-icon-search"></el-button>
         </el-input>
-        <el-button type="success" plain @click="userAdd">添加用户</el-button>
+        <el-button type="success" plain @click.prevent="AdduserFormVisible = true">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 添加用户 -->
-    <el-dialog title="添加用户" :visible.sync="userFormVisible">
+    <el-dialog title="添加用户" :visible.sync="AdduserFormVisible">
       <el-form label-position="right" label-width="120px" :model="form">
         <el-form-item label="用户名">
           <el-input v-model="form.username"  auto-complete="off"></el-input>
@@ -32,7 +32,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="userFormVisible = false">取 消</el-button>
+        <el-button @click="AdduserFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="userAdd">确 定</el-button>
       </div>
     </el-dialog> 
@@ -72,6 +72,7 @@
         label="用户状态">
         <template slot-scope="scope">
           <el-switch
+            @change="handleSwitchChange(scope.row)"
             v-model="scope.row.mg_state"
             active-color="#13ce66"
             inactive-color="#ff4949">
@@ -82,7 +83,7 @@
         label="操作">
         <template slot-scope="scope">
           <el-button plain size="mini" type="primary" icon="el-icon-edit" ></el-button>
-          <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="delUser"></el-button>
+          <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="delUser(scope.row.id)"></el-button>
           <!-- <el-button plain size="mini" type="danger" icon="el-icon-delete" :key="index" v-for="(item, index) in list" @click="delUser(item.id)"></el-button> -->
           <el-button plain size="mini" type="success" icon="el-icon-check" ></el-button>
         </template>
@@ -115,7 +116,7 @@ export default {
     return {
       list: [],
       loading: true,
-      userFormVisible: false,
+      AdduserFormVisible: false,
       searchValue: '',
       pagenum: 1,
       pagesize: 8,
@@ -167,39 +168,47 @@ export default {
     handleSearch() {
       this.loadData();
     },
+    handleSwitchChange(user) {
+      this.$http.put(`users/${user.id}/state/${user.mg_state}`)
+        .then((res) => {
+          const { meta: { status, msg } } =res.data;
+          if (status == 200) {
+            this.$message.success(msg)
+          } else {
+            this.$message.success(msg)
+          }
+        })
+    },
     userAdd() {
       this.$http.post('users', this.form)
         .then((res) => {
             if (res.status == 200) {
               this.$message.warning('添加成功');
-              this.userFormVisible = false;
-              this.form.username = '',
-              this.form.password = '',
-              this.form.email = '',
-              this.form.mobile = '',
+              this.AdduserFormVisible = false;
+              for (let key in this.form) {
+                this.form[key] = '';
+              };
               this.loadData();
             } else {
               this.$message.error('添加失败');
-              this.userFormVisible = true;
+              this.AdduserFormVisible = true;
             }
-          // }
         })
     },
-    delUser(id) {
+    async delUser(id) {
       this.$confirm('确定要删除该用户么?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-        this.$http.delete(`users/${id}`)
-          .then((res) => {
-            const {mate: {status, msg}} = res.data;
-            if (status == 200) {
-              this.$message.warning('删除成功');
-              this.loadData()
-            }
-          })
+        .then(async () => {
+          const res = await this.$http.delete(`users/${id}`);
+          console.log(res);
+          const {meta: {status, msg}} = res.data;
+          if (status == 200) {
+            this.loadData()
+            this.loadData()
+          }
           this.$message({
             type: 'success',
             message: '删除成功'
