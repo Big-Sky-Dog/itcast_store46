@@ -17,11 +17,11 @@
     </el-row>
     <!-- 添加用户 -->
     <el-dialog title="添加用户" :visible.sync="AdduserFormVisible">
-      <el-form label-position="right" label-width="120px" :model="form">
-        <el-form-item label="用户名">
+      <el-form label-position="right" label-width="120px" :model="form" ref="myform" :rules="formRules">
+        <el-form-item label="用户名"  prop="username">
           <el-input v-model="form.username"  auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码">
+        <el-form-item label="密码"  prop="password">
           <el-input v-model="form.password" type="password" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="邮箱">
@@ -127,6 +127,16 @@ export default {
         email: '',
         mobile: ''
       },
+     formRules: {
+        username: [
+          { required: true, message: '请输入用户名称', trigger: 'blur' },
+          { min: 1, max: 6, message: '长度在 1 到 6 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
+        ]
+     }
     }
   },
   created() {
@@ -183,7 +193,7 @@ export default {
       this.$http.post('users', this.form)
         .then((res) => {
             if (res.status == 200) {
-              this.$message.warning('添加成功');
+              this.$message.success('添加成功');
               this.AdduserFormVisible = false;
               for (let key in this.form) {
                 this.form[key] = '';
@@ -206,8 +216,8 @@ export default {
           console.log(res);
           const {meta: {status, msg}} = res.data;
           if (status == 200) {
-            this.loadData()
-            this.loadData()
+            this.pagenum = 1;
+            this.loadData();
           }
           this.$message({
             type: 'success',
