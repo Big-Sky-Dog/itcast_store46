@@ -5,12 +5,11 @@ import Home from '@/views/home'
 import Users from '@/views/users/users'
 import Rigths from '@/views/roles/rigths'
 import Roles from '@/views/roles/roles'
-import MyBreadcrumb from '@/components/MyBreadcrumb'
+import {Message} from 'element-ui'
 
 Vue.use(Router)
-Vue.component(MyBreadcrumb.name, MyBreadcrumb)
 
-export default new Router({
+const router =  new Router({
   routes: [
     {
       name: 'login',
@@ -19,7 +18,7 @@ export default new Router({
     },
     {
       name: 'home',
-      path: '/home',
+      path: '/',
       component: Home,
       children: [
         {
@@ -41,3 +40,17 @@ export default new Router({
     }
   ]
 })
+router.beforeEach((to, from, next)  => {
+  if(to.name == 'login') {
+    next()
+  } else {
+    const token = sessionStorage.getItem('token');
+    if(!token) {
+      roter.push({name: 'login'});
+      Message.warning('请先登录');
+      return;
+    }
+    next();
+  }
+})
+export default router;
