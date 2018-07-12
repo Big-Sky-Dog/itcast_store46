@@ -5,6 +5,7 @@ import Home from '@/views/home'
 import Users from '@/views/users/users'
 import Rigths from '@/views/roles/rigths'
 import Roles from '@/views/roles/roles'
+import Category from '@/views/goods/Category'
 import {Message} from 'element-ui'
 
 Vue.use(Router)
@@ -35,6 +36,11 @@ const router =  new Router({
           name: 'roles',
           path: '/roles',
           component: Roles
+        },
+        {
+          name: 'category',
+          path: '/categories',
+          component: Category
         }
       ]
     }
