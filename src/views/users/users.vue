@@ -1,11 +1,7 @@
 <template>
     <el-card class="box-card">
     <!-- 面包屑 -->
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
-    </el-breadcrumb>
+    <my-breadcrumb level1="权限管理" level2="权限列表"></my-breadcrumb>
     <!-- 搜索区域 -->
     <el-row class="searchArea">
       <el-col :span="24">
@@ -179,7 +175,7 @@ export default {
         email: '',
         mobile: ''
       },
-     formRules: {
+      formRules: {
         username: [
           { required: true, message: '请输入用户名称', trigger: 'blur' },
           { min: 1, max: 6, message: '长度在 1 到 6 个字符', trigger: 'blur' }
@@ -188,19 +184,17 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
         ]
-     },
-     editUserDialogVisible: false,
-     setRoleDialogVisible: false,
-     currentUserName: '',
-    currentUserId: -1,
-    currentRoleId: -1,
-    roles: []
+      },
+      editUserDialogVisible: false,
+      setRoleDialogVisible: false,
+      currentUserName: '',
+      currentUserId: -1,
+      currentRoleId: -1,
+      roles: []
     }
   },
   created() {
     this.loadData();
-  },
-  mounted (){
   },
   methods: {
     handleSizeChange(val) {
@@ -329,6 +323,7 @@ export default {
 
       // 根据用户id查询用户对象，角色id
       const res1 = await this.$http.get(`users/${user.id}`);
+      console.log(res1)
       this.currentRoleId = res1.data.data.rid;
     },
     // 分配角色
