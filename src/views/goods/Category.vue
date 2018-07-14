@@ -5,7 +5,7 @@
 
     <el-row class="row-add">
       <el-col :span="24">
-        <el-button type="success" plain>添加分类</el-button>
+        <el-button type="success" plain @click="handleShowAdd">添加分类</el-button>
       </el-col>
     </el-row>
 
@@ -55,8 +55,8 @@
       <el-table-column
         label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit" ></el-button>
-          <el-button plain size="mini" type="danger" icon="el-icon-delete" ></el-button>
+          <el-button plain size="mini" type="primary" icon="el-icon-edit" @click="handleShowEdit(scope.row)"></el-button>
+          <el-button plain size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -69,6 +69,45 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
+    
+    <!-- 添加分类 -->
+    <el-dialog title="添加分类" :visible.sync="addFormDialog">
+      <el-form :model="addForm" ref="addForm">
+        <el-form-item label="分类名称" label-width="100px" prop="cat_name">
+          <el-input v-model="addForm.cat_name" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="父级分类" label-width="100px">
+          <el-cascader
+            expand-trigger="hover"
+            :options="options"
+            change-on-select
+            :props="{
+              label: 'cat_name',
+              value: 'cat_id',
+              children: 'children'
+            }"
+            v-model="selectedOptions2">
+          </el-cascader>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addFormDialog = false">取 消</el-button>
+        <el-button type="primary" @click="handleAdd">确 定</el-button>
+      </div>
+    </el-dialog>
+  
+    <!-- 编辑分类对话框 -->
+    <el-dialog title="编辑分类" :visible.sync="editFormDialog">
+      <el-form :model="editForm" ref="addForm">
+        <el-form-item label="分类名称" label-width="100px" prop="cat_name">
+          <el-input v-model="editForm.cat_name" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editFormDialog = false">取 消</el-button>
+        <el-button type="primary" @click="handleEdit">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -80,8 +119,18 @@ export default {
       list: [],
       loading: true,
       pagenum: 1,
-      pagesize: 8,
-      total: 0
+      pagesize: 5,
+      total: 0,
+      addFormDialog: false,
+      editFormDialog: false,
+      addForm: {
+        cat_name: ''
+      },
+      editForm: {
+        cat_name: ''
+      },
+      selectedOptions2: [],
+      options: []
     }
   },
   created() {
@@ -103,6 +152,64 @@ export default {
     handleCurrentChange(val) {
       this.pagenum = val;
       this.loadData();
+    },
+    async handleShowAdd() {
+      this.addFormDialog = true;
+      const res = await this.$http.get('categories',{type: 2})
+      this.options = res.data.data;
+    },
+    async handleAdd() {
+      const fromData = {
+        ...this.addForm,
+        cat_pid: this.selectedOptions2[this.selectedOptions2 - 1],
+        cat_level: this.selectedOptions2.length
+      }
+      const res = await this.$http.post('categories', fromData)
+      console.log(res)
+      if(res.data.meta.status == 201) {
+        this.addFormDialog = false;
+        this.$refs['addForm'].resetFields();
+        this.selectedOptions2 = [];
+        this.loadData();
+        this.$message.success('添加成功');
+      } else {
+        this.$message.error(res.data.meta.msg)
+      }
+    },
+    async handleDelete(cat) {
+      this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$http.delete(`categories/${cat.cat_id}`)
+        const { data, meta } = res.data;
+        if (meta.status === 200) {
+          this.$message.success('删除成功');
+          this.loadData();
+        } else {
+          this.$message.error('删除失败');
+        }
+      }).catch(() => {
+        this.$message.info('已取消删除');
+      });
+    },
+    handleShowEdit(cat) {
+      this.editForm = cat;
+      this.editFormDialog = true;
+    },
+    async handleEdit() {
+      const {cat_id, cat_name} = this.editForm;
+      const res = await this.$http.put(`categories/${cat_id}`, {cat_name})
+      console.log(res);
+      const {data, meta} = res.data;
+      if(meta.status == 200) {
+        this.$message.success(meta.msg);
+        this.loadData();
+        this.editFormDialog = false;
+      } else {
+        this.$message.error(meta.msg);
+      }
     }
   },
   components: {
