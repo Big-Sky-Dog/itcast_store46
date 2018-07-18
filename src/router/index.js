@@ -8,7 +8,9 @@ import Roles from '@/views/roles/roles'
 import Category from '@/views/goods/Category'
 import GoodList from '@/views/goods/List'
 import GoodAdd from '@/views/goods/Add'
+import OrderList from '@/views/orders/List'
 import {Message} from 'element-ui'
+import NProgress from 'nprogress'
 
 Vue.use(Router)
 
@@ -53,12 +55,18 @@ const router =  new Router({
           name: 'goods-add',
           path: '/goods/add',
           component: GoodAdd
+        },
+        {
+          name: 'order-list',
+          path: 'orders',
+          component: OrderList
         }
       ]
     }
   ]
 })
 router.beforeEach((to, from, next)  => {
+  NProgress.start();
   if(to.name == 'login') {
     next()
   } else {
@@ -70,5 +78,8 @@ router.beforeEach((to, from, next)  => {
     }
     next();
   }
+})
+router.afterEach((to, from) => {
+  NProgress.done();
 })
 export default router;

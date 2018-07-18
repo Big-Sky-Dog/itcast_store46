@@ -81,6 +81,8 @@
             expand-trigger="hover"
             :options="options"
             change-on-select
+            clearable
+            placeholder="默认是一级分类"
             :props="{
               label: 'cat_name',
               value: 'cat_id',
@@ -159,9 +161,13 @@ export default {
       this.options = res.data.data;
     },
     async handleAdd() {
+      let catPid = 0;
+      if (this.selectedOptions2[0]) {
+        catPid = this.selectedOptions2[this.selectedOptions2.length - 1];
+      }
       const fromData = {
         ...this.addForm,
-        cat_pid: this.selectedOptions2[this.selectedOptions2 - 1],
+        cat_pid: catPid,
         cat_level: this.selectedOptions2.length
       }
       const res = await this.$http.post('categories', fromData)
@@ -183,7 +189,7 @@ export default {
         type: 'warning'
       }).then(async () => {
         const res = await this.$http.delete(`categories/${cat.cat_id}`)
-        const { data, meta } = res.data;
+        const { meta } = res.data;
         if (meta.status === 200) {
           this.$message.success('删除成功');
           this.loadData();
@@ -202,7 +208,7 @@ export default {
       const {cat_id, cat_name} = this.editForm;
       const res = await this.$http.put(`categories/${cat_id}`, {cat_name})
       console.log(res);
-      const {data, meta} = res.data;
+      const {meta} = res.data;
       if(meta.status == 200) {
         this.$message.success(meta.msg);
         this.loadData();

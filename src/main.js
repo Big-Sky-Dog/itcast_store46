@@ -9,6 +9,7 @@ import MyAxios from './plugins/MyAxios'
 import './assets/css/style.css'
 import moment from 'moment'
 import MyBreadcrumb from '@/components/MyBreadcrumb'
+import 'nprogress/nprogress'
 
 Vue.config.productionTip = false
 Vue.component(MyBreadcrumb.name, MyBreadcrumb)

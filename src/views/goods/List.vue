@@ -135,8 +135,12 @@ export default {
       });
       this.loading = false;
       const { data, meta } = resData;
-      this.list = data.goods;
-      this.total = data.total;
+      if(meta.status == 200) {
+        this.list = data.goods;
+        this.total = data.total;
+      } else {
+        this.$message.warning('获取信息失败');
+      }
     },
     handleSizeChange(val) {
       this.pagesize = val;

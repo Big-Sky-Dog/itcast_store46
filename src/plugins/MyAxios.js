@@ -1,4 +1,5 @@
 import axios from 'axios';
+import NProgress from 'nprogress'
 
 const MyAxios = {};
 MyAxios.install = (Vue) => {
@@ -9,6 +10,7 @@ MyAxios.install = (Vue) => {
     baseURL: 'http://localhost:8888/api/private/v1/'
   })
   instance.interceptors.request.use(function (config) {
+    NProgress.start();
     // Do something before request is sent
     // 判断当前请求的地址是否是login
     if (config.url.toLowerCase() !== 'login') {
@@ -25,7 +27,7 @@ MyAxios.install = (Vue) => {
   // Add a response interceptor
   instance.interceptors.response.use(function (response) {
     // Do something with response data
-    
+    NProgress.done();
     return response;
   }, function (error) {
     // Do something with response error
