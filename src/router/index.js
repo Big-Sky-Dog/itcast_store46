@@ -9,6 +9,7 @@ import Category from '@/views/goods/Category'
 import GoodList from '@/views/goods/List'
 import GoodAdd from '@/views/goods/Add'
 import OrderList from '@/views/orders/List'
+import Reports from '@/views/reports/index'
 import {Message} from 'element-ui'
 import NProgress from 'nprogress'
 
@@ -60,6 +61,11 @@ const router =  new Router({
           name: 'order-list',
           path: 'orders',
           component: OrderList
+        },
+        {
+          name: 'reports',
+          path: '/reports',
+          component: Reports
         }
       ]
     }

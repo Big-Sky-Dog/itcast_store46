@@ -76,11 +76,7 @@ export default {
       list: [],
       options: regionData,
       selectedOptions: [],
-      map: null,
-      page: {
-        pagenum: 1,
-        pagesize: 10
-      }
+      map: null
     };
   },
   created() {
@@ -93,7 +89,12 @@ export default {
   },
   methods: {
     async loadData() {
-      const res = await this.$http.get('orders', this.page);
+      const res = await this.$http.get('orders', {
+        params: {
+          pagenum: 1,
+          pagesize: 10
+        }
+      });
       const { data, meta } = res.data;
       if (meta.status === 200) {
         this.list = data.goods;
